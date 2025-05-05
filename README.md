@@ -30,6 +30,37 @@ Clone this repository to your Neovim configuration directory (typically `~/.conf
 ```sh
 # Example for Linux/macOS
 git clone https://github.com/barisgit/neovim-config.git ~/.config/nvim
+
+# Or if you don't want to clone the repo
+degit barisgit/neovim-config ~/.config/nvim
+```
+
+To use this with vscode, you also need to install following extensions:
+
+* [VSCode Neovim](https://marketplace.visualstudio.com/items?itemName=asvetliakov.vscode-neovim)
+* [Neovim Ui Modifier](https://marketplace.visualstudio.com/items?itemName=JulianIaquinandi.nvim-ui-modifier)
+
+and then add following to your vscode settings:
+
+```json
+{
+"nvim-ui.nvimColorCustomizationKeys": [
+    "activityBar.background",
+    "activityBarBadge.background",
+    "editorCursor.foreground",
+    "inputValidation.errorBorder",
+    "panel.border",
+    "panelTitle.activeBorder",
+    "panelTitle.activeForeground",
+    "peekView.border",
+    "peekViewTitleLabel.foreground",
+    "tab.activeBorder"
+  ],
+  "nvim-ui.nvimColorNormal": "#ffc600",
+  "nvim-ui.nvimColorInsert": "#D32F2F",
+  "nvim-ui.nvimColorVisual": "#673AB7",
+ "nvim-ui.nvimColorReplace": "#000"
+}
 ```
 
 Start Neovim after cloning:
