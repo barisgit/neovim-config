@@ -8,10 +8,14 @@
 
 return {
   -- NOTE: Yes, you can install new plugins here!
-  'mfussenegger/nvim-dap',
-  -- NOTE: And you can specify dependencies as well
+  -- NOTE: Plugins can be added by citing a repository on GitHub
+
+  -- NOTE: Plugins can also be added by using a table, like this:
+  "mfussenegger/nvim-dap",
+  cond = not vim.g.vscode,
   dependencies = {
-    -- Creates a beautiful debugger UI
+    -- Creates a beautiful experience for DAP
+    -- NOTE: You don't need this plugin to use the debugging experience.
     'rcarriga/nvim-dap-ui',
 
     -- Required dependency for nvim-dap-ui
