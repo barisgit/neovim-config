@@ -10,6 +10,9 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
+-- Don't show the mode, since it's already in the status line
+vim.opt.showmode = false
+
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -444,7 +447,7 @@ require('lazy').setup({
       { 'j-hui/fidget.nvim',       opts = {} },
 
       -- Allows extra capabilities provided by blink.cmp
-      'saghen/blink.cmp',
+      -- 'saghen/blink.cmp',
     },
     config = function()
       -- Brief aside: **What is LSP?**
@@ -613,7 +616,7 @@ require('lazy').setup({
       --  By default, Neovim doesn't support everything that is in the LSP specification.
       --  When you add blink.cmp, luasnip, etc. Neovim now has *more* capabilities.
       --  So, we create new capabilities with blink.cmp, and then broadcast that to the servers.
-      local capabilities = require('blink.cmp').get_lsp_capabilities()
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
 
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -691,12 +694,11 @@ require('lazy').setup({
   },
 
   -- Highlight todo, notes, etc in comments
-  { 'folke/todo-comments.nvim', event = 'VimEnter',     dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false }, cond = not vim.g.vscode },
+  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false }, cond = not vim.g.vscode },
 
   {                     -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
-    cond = not vim.g.vscode,
     opts = {
       -- delay between pressing a key and opening which-key (milliseconds)
       -- this setting is independent of vim.opt.timeoutlen
@@ -766,19 +768,78 @@ require('lazy').setup({
       require('mini.surround').setup()
 
       -- Simple and easy statusline.
-      --  You could remove this setup call if you don't like it,
-      --  and try some other statusline plugin
       local statusline = require 'mini.statusline'
-      -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font }
+      statusline.setup {
+        use_icons = vim.g.have_nerd_font,
+        content = {
+          active = function()
+            local mode, mode_hl = statusline.section_mode({ trunc_width = 120 })
+            local filename = statusline.section_filename({ trunc_width = 140, file_readonly = true, file_modified = true })
+            local git = statusline.section_git({ trunc_width = 75, diff = true }) -- Assuming diff = true is a valid arg or handled by mini.git
+            local diagnostics = statusline.section_diagnostics({ trunc_width = 75 })
+            local lsp = statusline.section_lsp({ trunc_width = 75 })
+            local location = statusline.section_location({ trunc_width = 75 })
+            local fileinfo = statusline.section_fileinfo({ trunc_width = 120 })
+
+            return statusline.combine_groups({
+              { hl = mode_hl,                 strings = { mode } },
+              { hl = 'MiniStatuslineDevinfo', strings = { git, diagnostics, lsp } },
+              '%<', -- Mark general truncate point
+              { hl = 'MiniStatuslineFilename', strings = { filename } },
+              '%=', -- End left alignment
+              { hl = 'MiniStatuslineFileinfo', strings = { fileinfo } },
+              { hl = mode_hl,                  strings = { location } },
+            })
+          end,
+          inactive = function()
+            -- For inactive, just filename, ensuring it's called with an args table
+            return statusline.section_filename({ trunc_width = 140 })
+          end,
+        },
+      }
 
       -- You can configure sections in the statusline by overriding their
       -- default behavior. For example, here we set the section for
       -- cursor location to LINE:COLUMN
       ---@diagnostic disable-next-line: duplicate-set-field
       statusline.section_location = function()
-        return '%2l:%-2v'
+        if not vim.g.vscode then
+          return '%2l:%-2v'
+        else
+          return ''
+        end
       end
+
+      -- mini.completion setup
+      require('mini.completion').setup {
+        -- Using default config from mini.completion documentation
+        delay = { completion = 100, info = 100, signature = 50 },
+        window = {
+          info = { height = 25, width = 80, border = nil },
+          signature = { height = 25, width = 80, border = nil },
+        },
+        lsp_completion = {
+          source_func = 'completefunc',
+          auto_setup = true,
+          process_items = nil,  -- Uses MiniCompletion.default_process_items
+          snippet_insert = nil, -- Uses MiniCompletion.default_snippet_insert
+        },
+        fallback_action = '<C-n>',
+        mappings = {
+          force_twostep = '<C-Space>',
+          force_fallback = '<A-Space>',
+          scroll_down = '<C-f>',
+          scroll_up = '<C-b>',
+        },
+      }
+
+      -- mini.indentscope setup
+      require('mini.indentscope').setup {
+        -- No specific options needed for default setup, {} is fine
+        -- Or you can explore its options later:
+        -- symbol = '|',
+        -- options = { try_as_border = true },
+      }
 
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
@@ -823,7 +884,7 @@ require('lazy').setup({
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
-  { import = 'custom.plugins',  cond = not vim.g.vscode },
+  { import = 'custom.plugins' },
   --  -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
   -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
@@ -855,6 +916,8 @@ require('lazy').setup({
 -- ##############################################################################
 
 if vim.g.vscode then
+  require "custom.vscode_keymaps"
+  require "custom.options"
   -- ##############################################################################
   -- VSCODE CONFIGURATION START
   -- VSCode extension specific configuration can go here
@@ -901,9 +964,6 @@ else
 
   -- Enable mouse mode, can be useful for resizing splits for example!
   vim.opt.mouse = 'a'
-
-  -- Don't show the mode, since it's already in the status line
-  vim.opt.showmode = false
 
   -- Enable break indent
   vim.opt.breakindent = true
