@@ -774,7 +774,8 @@ require('lazy').setup({
         content = {
           active = function()
             local mode, mode_hl = statusline.section_mode({ trunc_width = 120 })
-            local filename = statusline.section_filename({ trunc_width = 140, file_readonly = true, file_modified = true })
+            local filename = vim.g.vscode and "" or
+                statusline.section_filename({ trunc_width = 140, file_readonly = true, file_modified = true })
             local git = statusline.section_git({ trunc_width = 75, diff = true }) -- Assuming diff = true is a valid arg or handled by mini.git
             local diagnostics = statusline.section_diagnostics({ trunc_width = 75 })
             local lsp = statusline.section_lsp({ trunc_width = 75 })
