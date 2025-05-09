@@ -292,6 +292,7 @@ require('lazy').setup({
         opts = {},
       },
       'folke/lazydev.nvim',
+      { 'saghen/blink.compat', version = '*' },
     },
     --- @module 'blink.cmp'
     --- @type blink.cmp.Config
@@ -337,9 +338,27 @@ require('lazy').setup({
       },
 
       sources = {
-        default = { 'lsp', 'path', 'snippets', 'lazydev' },
+        default = { 'lsp', 'path', 'snippets', 'lazydev', 'avante_commands', 'avante_mentions', 'avante_files' },
         providers = {
           lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
+          avante_commands = {
+            name = 'avante_commands',
+            module = 'blink.compat.source',
+            score_offset = 90, -- show at a higher priority than lsp
+            opts = {},
+          },
+          avante_files = {
+            name = 'avante_files',
+            module = 'blink.compat.source',
+            score_offset = 100, -- show at a higher priority than lsp
+            opts = {},
+          },
+          avante_mentions = {
+            name = 'avante_mentions',
+            module = 'blink.compat.source',
+            score_offset = 1000, -- show at a higher priority than lsp
+            opts = {},
+          },
         },
       },
 
@@ -742,9 +761,12 @@ require('lazy').setup({
 
       -- Document existing key chains
       spec = {
+        { '<leader>c', group = '[C]ode Actions' },                 -- For TreeSJ
         { '<leader>s', group = '[S]earch' },
-        { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>t', group = '[T]erminal / [T]oggles' },         -- For Toggleterm, Inlay Hints
+        { '<leader>x', group = '[X]tra / Diagnostics (Trouble)' }, -- For Trouble
+        { '<leader>h', group = 'Git [H]unk',                    mode = { 'n', 'v' } },
+        { '<leader>a', group = '[A]vante' },
       },
     },
   },
@@ -773,16 +795,16 @@ require('lazy').setup({
         use_icons = vim.g.have_nerd_font,
         content = {
           active = function()
-            local mode, mode_hl = statusline.section_mode({ trunc_width = 120 })
-            local filename = vim.g.vscode and "" or
-                statusline.section_filename({ trunc_width = 140, file_readonly = true, file_modified = true })
-            local git = statusline.section_git({ trunc_width = 75, diff = true }) -- Assuming diff = true is a valid arg or handled by mini.git
-            local diagnostics = statusline.section_diagnostics({ trunc_width = 75 })
-            local lsp = statusline.section_lsp({ trunc_width = 75 })
-            local location = statusline.section_location({ trunc_width = 75 })
-            local fileinfo = statusline.section_fileinfo({ trunc_width = 120 })
+            local mode, mode_hl = statusline.section_mode { trunc_width = 120 }
+            local filename = vim.g.vscode and '' or
+                statusline.section_filename { trunc_width = 140, file_readonly = true, file_modified = true }
+            local git = statusline.section_git { trunc_width = 75, diff = true } -- Assuming diff = true is a valid arg or handled by mini.git
+            local diagnostics = statusline.section_diagnostics { trunc_width = 75 }
+            local lsp = statusline.section_lsp { trunc_width = 75 }
+            local location = statusline.section_location { trunc_width = 75 }
+            local fileinfo = statusline.section_fileinfo { trunc_width = 120 }
 
-            return statusline.combine_groups({
+            return statusline.combine_groups {
               { hl = mode_hl,                 strings = { mode } },
               { hl = 'MiniStatuslineDevinfo', strings = { git, diagnostics, lsp } },
               '%<', -- Mark general truncate point
@@ -790,11 +812,11 @@ require('lazy').setup({
               '%=', -- End left alignment
               { hl = 'MiniStatuslineFileinfo', strings = { fileinfo } },
               { hl = mode_hl,                  strings = { location } },
-            })
+            }
           end,
           inactive = function()
             -- For inactive, just filename, ensuring it's called with an args table
-            return statusline.section_filename({ trunc_width = 140 })
+            return statusline.section_filename { trunc_width = 140 }
           end,
         },
       }
@@ -873,6 +895,93 @@ require('lazy').setup({
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
 
+  {
+    'yetone/avante.nvim',
+    cond = not vim.g.vscode,
+    event = 'VeryLazy',
+    version = false, -- Never set this value to "*"! Never!
+    opts = {
+      -- add any opts here
+      -- for example
+      provider = 'gemini',
+      cursor_applying_provider = 'groq_applying', -- In this example, use Groq for applying, but you can also use any provider you want.
+      auto_suggestions_provider = 'groq',         -- Use Groq for auto-suggestions
+      behaviour = {
+        --- ... existing behaviours
+        auto_suggestions = false,           -- Disable auto-suggestions
+        enable_cursor_planning_mode = true, -- enable cursor planning mode!
+      },
+      gemini = {
+        model = 'gemini-2.5-flash-preview-04-17',
+        max_tokens = 8192,
+        temperature = 0,
+        timeout = 30000,
+        --reasoning_effort = "medium", -- low|medium|high, only used for reasoning models
+      },
+      vendors = {
+        --- ... existing vendors
+        groq_applying = { -- define groq provider
+          __inherited_from = 'openai',
+          api_key_name = 'GROQ_API_KEY',
+          endpoint = 'https://api.groq.com/openai/v1/',
+          model = 'llama-3.1-8b-instant',
+          max_completion_tokens = 32768, -- remember to increase this value, otherwise it will stop generating halfway
+        },
+        groq = {                         -- define groq provider
+          __inherited_from = 'openai',
+          api_key_name = 'GROQ_API_KEY',
+          endpoint = 'https://api.groq.com/openai/v1/',
+          model = 'llama-3.1-8b-instant',
+          max_completion_tokens = 512, -- remember to increase this value, otherwise it will stop generating halfway
+        },
+      },
+      mappings = {
+        suggestion = {
+          accept = '<C-Enter>', -- Or any other key you prefer
+        },
+      },
+    },
+    -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
+    build = 'make',
+    -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'stevearc/dressing.nvim',
+      'nvim-lua/plenary.nvim',
+      'MunifTanjim/nui.nvim',
+      --- The below dependencies are optional,
+      'echasnovski/mini.pick',         -- for file_selector provider mini.pick
+      'nvim-telescope/telescope.nvim', -- for file_selector provider telescope
+      'hrsh7th/nvim-cmp',              -- autocompletion for avante commands and mentions
+      'ibhagwan/fzf-lua',              -- for file_selector provider fzf
+      'nvim-tree/nvim-web-devicons',   -- or echasnovski/mini.icons
+      {
+        -- support for image pasting
+        'HakonHarnes/img-clip.nvim',
+        event = 'VeryLazy',
+        opts = {
+          -- recommended settings
+          default = {
+            embed_image_as_base64 = false,
+            prompt_for_file_name = false,
+            drag_and_drop = {
+              insert_mode = true,
+            },
+            -- required for Windows users
+            use_absolute_path = true,
+          },
+        },
+      },
+      {
+        -- Make sure to set this up properly if you have lazy=true
+        'MeanderingProgrammer/render-markdown.nvim',
+        opts = {
+          file_types = { 'markdown', 'Avante' },
+        },
+        ft = { 'markdown', 'Avante' },
+      },
+    },
+  },
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
@@ -890,6 +999,139 @@ require('lazy').setup({
   -- Or use telescope!
   -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
   -- you can continue same window with `<space>sr` which resumes last telescope search
+
+  -- Add persistent terminal
+  {
+    'akinsho/toggleterm.nvim',
+    version = "*", -- or version = "v2.7.0" if you know the version you want
+    cond = not vim.g.vscode,
+    config = function()
+      require("toggleterm").setup({
+        -- size can be a number or function which is passed the current terminal
+        size = function(term)
+          if term.direction == "horizontal" then
+            return 15
+          elseif term.direction == "vertical" then
+            return vim.o.columns * 0.4
+          end
+        end,
+        open_mapping = [[<c-t>]],
+        hide_numbers = true, -- hide the number column in toggleterm buffers
+        shade_filetypes = {},
+        shade_terminals = true,
+        shading_factor = 2,
+        start_in_insert = true,
+        insert_mappings = true,   -- whether or not the open mapping applies in insert mode
+        terminal_mappings = true, -- whether or not the open mapping applies in the opened terminals
+        persist_size = true,
+        direction = 'float',      -- 'vertical' | 'horizontal' | 'tab' | 'float'
+        close_on_exit = true,     -- close the terminal window when the process exits
+        shell = vim.o.shell,      -- change the default shell
+        float_opts = {
+          -- The border key is *almost* the same as 'nvim_open_win'
+          -- see :h nvim_open_win for details on borders however
+          -- the 'curved' border is a custom border type
+          -- not natively supported but implemented in this plugin.
+          border = 'curved', -- 'single' | 'double' | 'shadow' | 'curved' |
+          -- like `size`, width, height, row, and col can be a number or function which is passed the current terminal
+          -- width = <value>,
+          -- height = <value>,
+          winblend = 0,
+          highlights = {
+            border = "Normal",
+            background = "Normal",
+          }
+        }
+      })
+
+      function _G.set_terminal_keymaps()
+        local opts = { noremap = true }
+        vim.api.nvim_buf_set_keymap(0, 't', '<esc>', [[<C-\><C-n>]], opts)
+        vim.api.nvim_buf_set_keymap(0, 't', 'jk', [[<C-\><C-n>]], opts)
+        vim.api.nvim_buf_set_keymap(0, 't', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
+        vim.api.nvim_buf_set_keymap(0, 't', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
+        vim.api.nvim_buf_set_keymap(0, 't', '<C-k>', [[<Cmd>wincmd k<CR>]], opts)
+        vim.api.nvim_buf_set_keymap(0, 't', '<C-l>', [[<Cmd>wincmd l<CR>]], opts)
+      end
+
+      -- if you only want these mappings for toggle term use term://*toggleterm#* instead
+      vim.cmd 'autocmd! TermOpen term://* lua set_terminal_keymaps()'
+
+      local Terminal     = require("toggleterm.terminal").Terminal
+      local lazygit      = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
+
+      _G._LAZYGIT_TOGGLE = function()
+        lazygit:toggle()
+      end
+      vim.keymap.set("n", "<leader>tl", '<cmd>lua _G._LAZYGIT_TOGGLE()<CR>',
+        { noremap = true, silent = true, desc = "Toggle [L]azyGit" })
+
+      -- Example of a more complex terminal setup for running go code
+      local go_run_term = Terminal:new({
+        cmd = "", -- We will set this dynamically or have the user type it
+        hidden = true,
+        direction = "float",
+        float_opts = {
+          border = "curved",
+        },
+        on_open = function(term)
+          vim.cmd("startinsert!")
+          vim.api.nvim_buf_set_keymap(term.bufnr, "t", "<C-x>", "<cmd>close<CR>", { noremap = true, silent = true })
+        end,
+        on_close = function(_term)
+          -- You could add cleanup or notification logic here if needed
+        end,
+        -- Persist the command history
+        auto_scroll = true, -- Keep scrolled to the bottom
+      })
+
+      _G._GO_RUN_TOGGLE = function()
+        go_run_term:toggle()
+      end
+      vim.keymap.set("n", "<leader>tr", '<cmd>lua _G._GO_RUN_TOGGLE()<CR>',
+        { noremap = true, silent = true, desc = "Toggle Go [R]un terminal" })
+    end
+  },
+
+  -- Surround plugin
+  {
+    'kylechui/nvim-surround',
+    version = "*", -- Use for stability
+    event = "VeryLazy",
+    config = function()
+      require("nvim-surround").setup({
+        -- Configuration if needed
+      })
+    end,
+  },
+
+  -- Treesj plugin for joining/splitting using treesitter
+  {
+    'Wansmer/treesj',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    event = "VeryLazy",
+    cond = not vim.g.vscode,
+    config = function()
+      require('treesj').setup {
+        use_default_keymaps = false, -- We'll set custom ones
+        max_join_length = 150,
+        -- Other options if needed
+      }
+      -- Custom keymaps for treesj
+      vim.keymap.set('n', '<leader>cj', require('treesj').join, { desc = '[C]ode [J]oin Block (TreeSJ)' })
+      vim.keymap.set('n', '<leader>cs', require('treesj').split, { desc = '[C]ode [S]plit Block (TreeSJ)' })
+      vim.keymap.set('n', '<leader>ct', require('treesj').toggle, { desc = '[C]ode [T]oggle Select (TreeSJ)' })
+    end,
+  },
+
+  -- Trouble plugin for pretty diagnostics
+  {
+    'folke/trouble.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    cmd = "Trouble",
+    cond = not vim.g.vscode,
+    opts = {}, -- Uses default configuration
+  },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
@@ -917,13 +1159,14 @@ require('lazy').setup({
 -- ##############################################################################
 
 if vim.g.vscode then
-  require "custom.vscode_keymaps"
-  require "custom.options"
+  require 'custom.vscode_keymaps'
+  require 'custom.options'
   -- ##############################################################################
   -- VSCODE CONFIGURATION START
   -- VSCode extension specific configuration can go here
   -- ##############################################################################
-  vim.api.nvim_exec([[
+  vim.api.nvim_exec(
+    [[
     " THEME CHANGER
     function! SetCursorLineNrColorInsert(mode)
         " Insert mode: blue
@@ -945,9 +1188,9 @@ if vim.g.vscode then
         autocmd CursorHold * call VSCodeNotify('nvim-theme.normal')
         autocmd ModeChanged [vV\x16]*:* call VSCodeNotify('nvim-theme.normal')
     augroup END
-]], false)
-
-
+]],
+    false
+  )
 
   -- ##############################################################################
   -- VSCODE CONFIGURATION END
@@ -964,7 +1207,7 @@ else
   vim.opt.relativenumber = true
 
   -- Enable mouse mode, can be useful for resizing splits for example!
-  vim.opt.mouse = 'a'
+  vim.opt.mouse = 'n'
 
   -- Enable break indent
   vim.opt.breakindent = true
@@ -996,7 +1239,6 @@ else
 
   -- Minimal number of screen lines to keep above and below the cursor.
   vim.opt.scrolloff = 20
-
   -- Keybinds to make split navigation easier.
   --  Use CTRL+<hjkl> to switch between windows
   --
@@ -1020,6 +1262,18 @@ else
       vim.cmd 'Neotree filesystem left reveal'
     end,
   })
+
+  -- Custom Keymaps for Trouble (globally defined after plugins load) -- TODO: Some of these are not working
+  vim.keymap.set("n", "<leader>xx", "<cmd>Trouble diagnostics<CR>", { desc = "Toggle Trouble" })
+  vim.keymap.set("n", "<leader>xw", "<cmd>Trouble workspace_diagnostics<CR>",
+    { desc = "Workspace Diagnostics (Trouble)" })
+  vim.keymap.set("n", "<leader>xd", "<cmd>Trouble document_diagnostics<CR>",
+    { desc = "Document Diagnostics (Trouble)" })
+  vim.keymap.set("n", "<leader>xl", "<cmd>Trouble loclist<CR>", { desc = "Location List (Trouble)" })
+  vim.keymap.set("n", "<leader>xq", "<cmd>Trouble quickfix<CR>", { desc = "Quickfix List (Trouble)" })
+  vim.keymap.set("n", "<leader>xr", "<cmd>Trouble lsp_references<CR>", { desc = "LSP References (Trouble)" })
+  vim.keymap.set("n", "<leader>xt", "<cmd>Trouble lsp_type_definitions<CR>", { desc = "LSP Type Definitions (Trouble)" })
+  vim.keymap.set("n", "<leader>xT", "<cmd>Trouble todo<CR>", { desc = "Todo (Trouble)" })
 
   -- ##############################################################################
   -- NEOVIM CONFIGURATION END
