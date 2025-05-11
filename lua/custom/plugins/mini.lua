@@ -31,10 +31,43 @@ return {
                     local lsp = statusline.section_lsp { trunc_width = 75 }
                     local location = statusline.section_location { trunc_width = 75 }
                     local fileinfo = statusline.section_fileinfo { trunc_width = 120 }
+                    local codeium_status_fn = function()
+                        if vim.g.vscode then
+                            return ''
+                        end
+
+                        local vt_ok, vt_module = pcall(require, 'codeium.virtual_text')
+                        if not vt_ok or vt_module == nil then
+                            return 'Codeium: NoVTMod' -- Debug: codeium.virtual_text module not found or require failed
+                        end
+
+                        local status_ok, status_str = pcall(vt_module.status_string)
+                        if not status_ok then
+                            return 'Codeium: ErrVTCall' -- Debug: error calling status_string
+                        end
+                        if status_str == nil then
+                            return 'Codeium: NilVTStr' -- Debug: status_string returned nil
+                        end
+                        if status_str == '' then
+                            return 'Codeium: EmptyVTStr' -- Debug: status_string returned an empty string
+                        end
+
+                        if status_str == '*' then
+                            return 'Codeium: Wait'
+                        elseif status_str == '0' then
+                            return 'Codeium: No Sugg'
+                        elseif string.match(status_str, '^%d+/%d+$') then
+                            return 'Codeium: ' .. status_str
+                        else
+                            -- Capture the actual unexpected string for better debugging
+                            return 'Codeium: UnkVT-' .. tostring(status_str)
+                        end
+                    end
+                    local codeium_status = codeium_status_fn()
 
                     return statusline.combine_groups {
                         { hl = mode_hl,                 strings = { mode } },
-                        { hl = 'MiniStatuslineDevinfo', strings = { git, diagnostics, lsp } },
+                        { hl = 'MiniStatuslineDevinfo', strings = { git, diagnostics, lsp, codeium_status } },
                         '%<', -- Mark general truncate point
                         { hl = 'MiniStatuslineFilename', strings = { filename } },
                         '%=', -- End left alignment
