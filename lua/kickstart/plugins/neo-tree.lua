@@ -22,6 +22,10 @@ return {
     filesystem = {
       window = {
         mappings = {
+          ['o'] = 'open_vsplit',
+          ['O'] = 'open_split',
+          ['s'] = 'noop',
+          ['S'] = 'noop',
           ['\\'] = 'close_window',
         },
       },
