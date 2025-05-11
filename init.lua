@@ -467,6 +467,8 @@ else
   -- ##############################################################################
 
   require('custom.neovim_settings')
+  require('custom.go_commands')
+  require('custom.rust_cargo_commands')
 
   -- ##############################################################################
   -- NEOVIM CONFIGURATION END
