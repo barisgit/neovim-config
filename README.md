@@ -35,6 +35,8 @@ git clone https://github.com/barisgit/neovim-config.git ~/.config/nvim
 degit barisgit/neovim-config ~/.config/nvim
 ```
 
+Note: Degit makes a git clone of the repository and deletes the .git folder so you have clean slate if you want to use this as your own.
+
 To use this with vscode, you also need to install following extensions:
 
 * [VSCode Neovim](https://marketplace.visualstudio.com/items?itemName=asvetliakov.vscode-neovim)
@@ -70,3 +72,5 @@ nvim
 ```
 
 Plugins will be automatically installed by `lazy.nvim`. Use `:Lazy` to check the status.
+
+Note: On MacOS I recommend using `WezTerm` as your terminal emulator, as it has better support for the `tmux` plugin.

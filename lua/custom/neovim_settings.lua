@@ -35,6 +35,9 @@ vim.opt.inccommand = 'split'
 -- Show which line your cursor is on
 vim.opt.cursorline = true
 
+vim.opt.tabstop = 4    -- Number of visual spaces per tab
+vim.opt.shiftwidth = 4 -- Number of spaces for autoindent
+
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 20
 -- Keybinds to make split navigation easier.
@@ -54,17 +57,16 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 
 -- Auto open Neo-tree on startup
 vim.api.nvim_create_autocmd('VimEnter', {
-    desc = 'Open Neo-tree on startup',
-    group = vim.api.nvim_create_augroup('UserNeoTree', { clear = true }),
-    callback = function()
-        vim.cmd 'Neotree filesystem left reveal'
-    end,
+  desc = 'Open Neo-tree on startup',
+  group = vim.api.nvim_create_augroup('UserNeoTree', { clear = true }),
+  callback = function()
+    vim.cmd 'Neotree filesystem left reveal'
+  end,
 })
 
 -- Custom Keymaps for Trouble (globally defined after plugins load) -- TODO: Some of these are not working
 vim.keymap.set('n', '<leader>xx', '<cmd>Trouble diagnostics<CR>', { desc = 'Toggle Trouble' })
-vim.keymap.set('n', '<leader>xw', '<cmd>Trouble workspace_diagnostics<CR>',
-    { desc = 'Workspace Diagnostics (Trouble)' })
+vim.keymap.set('n', '<leader>xw', '<cmd>Trouble workspace_diagnostics<CR>', { desc = 'Workspace Diagnostics (Trouble)' })
 vim.keymap.set('n', '<leader>xd', '<cmd>Trouble document_diagnostics<CR>', { desc = 'Document Diagnostics (Trouble)' })
 vim.keymap.set('n', '<leader>xl', '<cmd>Trouble loclist<CR>', { desc = 'Location List (Trouble)' })
 vim.keymap.set('n', '<leader>xq', '<cmd>Trouble quickfix<CR>', { desc = 'Quickfix List (Trouble)' })
