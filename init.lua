@@ -184,6 +184,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        rust = { 'rustfmt' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -226,7 +227,7 @@ require('lazy').setup({
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false }, cond = not vim.g.vscode },
 
-  {                     -- Useful plugin to show you pending keybinds.
+  { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     opts = {
@@ -272,17 +273,20 @@ require('lazy').setup({
 
       -- Document existing key chains
       spec = {
-        { '<leader>c',  group = '[C]ode Actions' },                 -- For TreeSJ
-        { '<leader>s',  group = '[S]earch' },
-        { '<leader>t',  group = '[T]erminal / [T]oggles' },         -- For Toggleterm, Inlay Hints
-        { '<leader>x',  group = '[X]tra / Diagnostics (Trouble)' }, -- For Trouble
-        { '<leader>h',  group = 'Git [H]unk',                    mode = { 'n', 'v' } },
-        { '<leader>a',  group = '[A]vante' },
-        { '<leader>m',  group = '[M]ini' },
-        { 'gr',         group = 'LSP [R]eferences' },
-        { '<leader>l',  group = '[L]anguage specific' },
+        { '<leader>c', group = '[C]ode Actions' }, -- For TreeSJ
+        { '<leader>s', group = '[S]earch' },
+        { '<leader>t', group = '[T]erminal / [T]oggles' }, -- For Toggleterm, Inlay Hints
+        { '<leader>x', group = '[X]tra / Diagnostics (Trouble)' }, -- For Trouble
+        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>a', group = '[A]I / [A]ssistant' },
+        { '<leader>m', group = '[M]ini' },
+        { '<leader>u', group = '[U]se / Buffer' },
+        { 'gr', group = 'LSP [R]eferences' },
+        { '<leader>l', group = '[L]anguage specific' },
         { '<leader>lr', group = '[R]ust' },
         { '<leader>lg', group = '[G]o' },
+        { '<leader>w', desc = 'Save file' },
+        { '<leader>W', desc = 'Save all buffers' },
       },
     },
   },
@@ -318,8 +322,8 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter-context',
     cond = not vim.g.vscode, -- Keep consistency with other UI/TS plugins
     opts = {
-      enable = true,         -- Explicitly enable, though it's the default
-      max_lines = 3,         -- Show a maximum of 3 lines for the context
+      enable = true, -- Explicitly enable, though it's the default
+      max_lines = 3, -- Show a maximum of 3 lines for the context
       -- mode = 'cursor', -- default is 'cursor', 'topline' is other option
       -- separator = '-', -- uncomment to show a separator line
     },

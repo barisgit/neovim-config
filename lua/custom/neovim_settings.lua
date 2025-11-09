@@ -55,6 +55,25 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
 -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
 
+-- Buffer navigation and management
+vim.keymap.set('n', '<leader>un', '<cmd>bnext<CR>', { desc = '[U]se buffer [N]ext' })
+vim.keymap.set('n', '<leader>up', '<cmd>bprev<CR>', { desc = '[U]se buffer [P]revious' })
+vim.keymap.set('n', '<leader>ud', '<cmd>bdelete<CR>', { desc = '[U]se buffer [D]elete' })
+vim.keymap.set('n', '<leader>ul', '<cmd>Telescope buffers<CR>', { desc = '[U]se buffer [L]ist (Telescope)' })
+
+-- Split and buffer combinations
+vim.keymap.set('n', '<leader>uv', '<cmd>vsplit | bnext<CR>', { desc = '[U]se buffer [V]ertical split next' })
+vim.keymap.set('n', '<leader>us', '<cmd>split | bnext<CR>', { desc = '[U]se buffer [S]plit next' })
+
+-- Save keybindings
+-- Cmd+S in iTerm2: Preferences > Profiles > Keys > + > Cmd+S > Send Hex Code: 13
+vim.keymap.set('n', '<C-s>', '<cmd>w<CR>', { noremap = true, silent = true, desc = 'Save file' })
+vim.keymap.set('i', '<C-s>', '<Esc><cmd>w<CR>', { noremap = true, silent = true, desc = 'Save file' })
+vim.keymap.set('n', '<C-S-s>', '<cmd>wa<CR>', { noremap = true, silent = true, desc = 'Save all buffers' })
+vim.keymap.set('i', '<C-S-s>', '<Esc><cmd>wa<CR>', { noremap = true, silent = true, desc = 'Save all buffers' })
+vim.keymap.set('n', '<leader>w', '<cmd>w<CR>', { noremap = true, silent = true, desc = 'Save file' })
+vim.keymap.set('n', '<leader>W', '<cmd>wa<CR>', { noremap = true, silent = true, desc = 'Save all buffers' })
+
 -- Auto open Neo-tree on startup
 vim.api.nvim_create_autocmd('VimEnter', {
   desc = 'Open Neo-tree on startup',

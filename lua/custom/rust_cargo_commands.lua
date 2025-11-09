@@ -81,6 +81,11 @@ _G.RUST_CARGO_DOC = function()
   run_cargo_command 'doc --open'
 end
 
+_G.RUST_CARGO_CLIPPY = function()
+  run_cargo_command 'clippy'
+end
+
 vim.keymap.set('n', '<leader>lrr', '<cmd>lua _G.RUST_CARGO_RUN()<CR>', { noremap = true, silent = true, desc = 'Cargo [R]un' })
 vim.keymap.set('n', '<leader>lrc', '<cmd>lua _G.RUST_CARGO_CHECK()<CR>', { noremap = true, silent = true, desc = 'Cargo [C]heck' })
 vim.keymap.set('n', '<leader>lrd', '<cmd>lua _G.RUST_CARGO_DOC()<CR>', { noremap = true, silent = true, desc = 'Cargo [D]oc' })
+vim.keymap.set('n', '<leader>lrl', '<cmd>lua _G.RUST_CARGO_CLIPPY()<CR>', { noremap = true, silent = true, desc = 'Cargo C[l]ippy' })
