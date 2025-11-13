@@ -74,14 +74,14 @@ vim.keymap.set('i', '<C-S-s>', '<Esc><cmd>wa<CR>', { noremap = true, silent = tr
 vim.keymap.set('n', '<leader>w', '<cmd>w<CR>', { noremap = true, silent = true, desc = 'Save file' })
 vim.keymap.set('n', '<leader>W', '<cmd>wa<CR>', { noremap = true, silent = true, desc = 'Save all buffers' })
 
--- Auto open Neo-tree on startup
-vim.api.nvim_create_autocmd('VimEnter', {
-  desc = 'Open Neo-tree on startup',
-  group = vim.api.nvim_create_augroup('UserNeoTree', { clear = true }),
-  callback = function()
-    vim.cmd 'Neotree filesystem left reveal'
-  end,
-})
+-- Auto open Neo-tree on startup (disabled - dashboard shows instead)
+-- vim.api.nvim_create_autocmd('VimEnter', {
+--   desc = 'Open Neo-tree on startup',
+--   group = vim.api.nvim_create_augroup('UserNeoTree', { clear = true }),
+--   callback = function()
+--     vim.cmd 'Neotree filesystem left reveal'
+--   end,
+-- })
 
 -- Custom Keymaps for Trouble (globally defined after plugins load) -- TODO: Some of these are not working
 vim.keymap.set('n', '<leader>xx', '<cmd>Trouble diagnostics<CR>', { desc = 'Toggle Trouble' })
