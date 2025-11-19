@@ -24,7 +24,7 @@ return {
               { icon = ' ', key = 'w', desc = 'Find Word', action = ":lua Snacks.dashboard.pick('grep_string')" },
               { icon = ' ', key = 'r', desc = 'Recent Files', action = ":lua Snacks.dashboard.pick('oldfiles')" },
               { icon = ' ', key = 'b', desc = 'Buffers', action = ":lua Snacks.dashboard.pick('buffers')" },
-              { icon = ' ', key = 'S', desc = 'Git Status', action = ":lua Snacks.dashboard.pick('git_status')" },
+              { icon = ' ', key = 'gs', desc = 'Git Status', action = ":lua Snacks.dashboard.pick('git_status')" },
               { icon = ' ', key = 'c', desc = 'Config', action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
               { icon = ' ', key = 'h', desc = 'Help Tags', action = ":lua Snacks.dashboard.pick('help_tags')" },
               { icon = '󰒲 ', key = 'L', desc = 'Lazy', action = ':Lazy', enabled = package.loaded.lazy ~= nil },
